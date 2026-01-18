@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QR Generator Pro</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffe6e9;
+      }
+
+      .box {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 340px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 6px;
+      }
+
+      input {
+        border: 1px solid #ccc;
+      }
+
+      button {
+        background: #ff4d6d;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      #qrBox {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+      }
+
+      #qrBox img {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+      }
+
+      .color-picker-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        margin: 8px 0;
+      }
+
+      .color-preview {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="box">
+      <h3>QR Code Generator Pro 😎</h3>
+
+      <input id="linkInput" placeholder="Paste link here..." />
+
+      <div class="color-picker-container">
+        <input type="color" id="colorPick" value="#000000" />
+        <div
+          class="color-preview"
+          id="colorPreview"
+          style="background-color: #000000"
+        ></div>
+      </div>
+
+      <button onclick="makeQR()">Generate QR</button>
+      <button onclick="downloadQR()">Download QR</button>
+
+      <div id="qrBox"></div>
+    </div>
+
+    <script>
+      let currentQR = "";
+
+      const colorPick = document.getElementById("colorPick");
+      const colorPreview = document.getElementById("colorPreview");
+
+      // Update preview box whenever color changes
+      colorPick.addEventListener("input", () => {
+        colorPreview.style.backgroundColor = colorPick.value;
+      });
+
+      function makeQR() {
+        let link = document.getElementById("linkInput").value.trim();
+        let qrBox = document.getElementById("qrBox");
+        let color = colorPick.value;
+
+        if (!link) {
+          alert("Link daalo bro 😅");
+          return;
+        }
+
+        const api =
+          "https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=" +
+          color.replace("#", "") +
+          "&data=";
+
+        currentQR = api + encodeURIComponent(link);
+        qrBox.innerHTML = `<img src="${currentQR}">`;
+      }
+
+      function downloadQR() {
+        if (!currentQR) {
+          alert("Pehle QR generate karo 😅");
+          return;
+        }
+
+        const a = document.createElement("a");
+        a.href = currentQR;
+        a.download = "my-qr.png";
+        a.click();
+      }
+    </script>
+  </body>
+</html>
