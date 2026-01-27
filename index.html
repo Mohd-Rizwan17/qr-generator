@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>QR Generator</title>
+
+    <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 
     <style>
       * {
@@ -17,24 +21,26 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #ffe6e9;
+        background: #3b3991;
       }
 
       .box {
         background: white;
-        padding: 25px;
-        border-radius: 12px;
-        width: 340px;
+        padding: 22px;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 360px;
         text-align: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
       }
 
       input,
       button {
         width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 6px;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        font-size: 16px;
       }
 
       input {
@@ -74,12 +80,33 @@
         border-radius: 6px;
         border: 1px solid #ccc;
       }
+
+      #qrBox img,
+      #qrBox canvas {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+      }
+      @media (max-width: 480px) {
+        .color-picker-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .color-preview {
+          width: 100%;
+          height: 28px;
+        }
+      }
+      button:active {
+        transform: scale(0.98);
+      }
     </style>
   </head>
 
   <body>
     <div class="box">
-      <h3>QR Code Generator Pro 😎</h3>
+      <h3>QR Code Generator Stylish 😎</h3>
 
       <input id="linkInput" placeholder="Paste link here..." />
 
@@ -90,6 +117,7 @@
           id="colorPreview"
           style="background-color: #000000"
         ></div>
+        <input type="file" id="imgInput" accept="image/*" />
       </div>
 
       <button onclick="makeQR()">Generate QR</button>
@@ -99,12 +127,11 @@
     </div>
 
     <script>
-      let currentQR = "";
+      let qrCode;
 
       const colorPick = document.getElementById("colorPick");
       const colorPreview = document.getElementById("colorPreview");
 
-      // Update preview box whenever color changes
       colorPick.addEventListener("input", () => {
         colorPreview.style.backgroundColor = colorPick.value;
       });
@@ -113,31 +140,99 @@
         let link = document.getElementById("linkInput").value.trim();
         let qrBox = document.getElementById("qrBox");
         let color = colorPick.value;
+        let imgInput = document.getElementById("imgInput");
 
         if (!link) {
           alert("Link daalo bro 😅");
           return;
         }
 
-        const api =
-          "https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=" +
-          color.replace("#", "") +
-          "&data=";
+        qrBox.innerHTML = "";
 
-        currentQR = api + encodeURIComponent(link);
-        qrBox.innerHTML = `<img src="${currentQR}">`;
+        let imgURL = "";
+
+        if (imgInput.files[0]) {
+          imgURL = URL.createObjectURL(imgInput.files[0]);
+        }
+
+        // qrCode = new QRCodeStyling({
+        //   width: 300,
+        //   height: 300,
+        //   data: link,
+        //   image: imgURL,
+        //   dotsOptions: {
+        //     gradient: {
+        //       type: "linear",
+        //       rotation: 0,
+        //       colorStops: [
+        //         { offset: 0, color: "#ff4d6d" },
+        //         { offset: 1, color: "#222" },
+        //       ],
+        //     },
+        //   },
+        //   cornersSquareOptions: {
+        //     type: "extra-rounded",
+        //   },
+        //   cornersDotOptions: {
+        //     type: "dot",
+        //   },
+        //   backgroundOptions: {
+        //     color: "#ffffff",
+        //   },
+        //   imageOptions: {
+        //     crossOrigin: "anonymous",
+        //     margin: 5,
+        //   },
+        // });
+        qrCode = new QRCodeStyling({
+          width: 340,
+          height: 340,
+          data: link,
+          image: imgURL,
+
+          dotsOptions: {
+            type: "dots",
+            gradient: {
+              type: "radial",
+              rotation: 0,
+              colorStops: [
+                { offset: 0, color: color },
+                { offset: 1, color: "#111" },
+              ],
+            },
+          },
+
+          cornersSquareOptions: {
+            type: "extra-rounded",
+            color: color,
+          },
+
+          cornersDotOptions: {
+            type: "dot",
+            color: color,
+          },
+
+          backgroundOptions: {
+            color: "#fff",
+          },
+
+          imageOptions: {
+            crossOrigin: "anonymous",
+            margin: 8,
+            imageSize: 0.35,
+          },
+        });
+
+        qrCode.append(qrBox);
       }
 
       function downloadQR() {
-        if (!currentQR) {
+        if (!qrCode) {
           alert("Pehle QR generate karo 😅");
           return;
         }
 
-        const a = document.createElement("a");
-        a.href = currentQR;
-        a.download = "my-qr.png";
-        a.click();
+        qrCode.download({ name: "my-qr", extension: "png" });
       }
     </script>
   </body>
